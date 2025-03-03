@@ -13,19 +13,19 @@ var creditCardNumbers = map[string]map[string]string{
 		"invalid": "1234-1234-1234-1234",
 	},
 	"visa": {
-		"valid":   "9876-5432-1098-7654",
+		"valid":   "4539 4278 7150 1877",
 		"invalid": "9876-5432-1098-7652",
 	},
 	"amex": {
-		"valid":   "1111-2222-3333-4444",
+		"valid":   "3722 070051 93215",
 		"invalid": "1111-2222-3333-4442",
 	},
 	"discover": {
-		"valid":   "5555-6666-7777-8888",
+		"valid":   "6011 2837 5268 7422",
 		"invalid": "5555-6666-7777-8882",
 	},
 	"diners": {
-		"valid":   "9999-0000-1111-2222",
+		"valid":   "3881 775683 4688",
 		"invalid": "9999-0000-1111-2223",
 	},
 }
@@ -74,9 +74,17 @@ const (
 )
 
 func testSuccess(t *testing.T) {
-	isValid, brandName := validator.Validate(creditCardNumbers["master"]["valid"])
-	assert.True(t, brandName == "master", "Expected brand name to be master")
-	assert.True(t, isValid, errExpectedCardNumberToBeValid)
+	for brand, numbers := range creditCardNumbers {
+		for _, number := range numbers {
+			isValid, brandName := validator.Validate(number)
+			if !isValid {
+				continue
+			}
+			assert.True(t, brandName == brand, "Expected brand name to be "+brand)
+			assert.True(t, isValid, errExpectedCardNumberToBeValid)
+		}
+	}
+
 }
 
 func testShortCardNumber(t *testing.T) {

@@ -48,18 +48,24 @@ func (c *cardValidator) sanitize(cardNumber string) string {
 	return re.ReplaceAllString(cardNumber, "")
 }
 
+var brandPrefixes = map[string]string{
+	"4":    "visa",
+	"5":    "master",
+	"34":   "amex",
+	"37":   "amex",
+	"6011": "discover",
+	"380":  "diners",
+	"386":  "diners",
+	"388":  "diners",
+}
+
+// getBrand returns the brand of a credit card number
+// based on the first digits of the card number
 func (c *cardValidator) getBrand(cardNumber string) string {
-	if cardNumber[0] == '4' {
-		return "visa"
+	for prefix, brand := range brandPrefixes {
+		if len(cardNumber) >= len(prefix) && cardNumber[:len(prefix)] == prefix {
+			return brand
+		}
 	}
-
-	if cardNumber[0] == '5' {
-		return "master"
-	}
-
-	if cardNumber[0] == '3' && (cardNumber[1] == '4' || cardNumber[1] == '7') {
-		return "amex"
-	}
-
 	return ""
 }
