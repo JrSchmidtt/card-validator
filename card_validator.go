@@ -8,10 +8,27 @@ type CardValidator interface {
 	Validate(cardNumber string) (isValid bool, brandName string)
 }
 
-type cardValidator struct{}
+type cardValidator struct {
+	brandPrefixes map[string]string
+}
 
-func NewCardValidator() CardValidator {
-	return &cardValidator{}
+func NewCardValidator(customPrefixes ...map[string]string) CardValidator {
+	var defaultPrefixes = map[string]string{
+		"4":    "visa",
+		"5":    "master",
+		"34":   "amex",
+		"37":   "amex",
+		"6011": "discover",
+		"380":  "diners",
+		"386":  "diners",
+		"388":  "diners",
+	}
+	if len(customPrefixes) > 0 {
+		for prefix, brand := range customPrefixes[0] {
+			defaultPrefixes[prefix] = brand
+		}
+	}
+	return &cardValidator{brandPrefixes: defaultPrefixes}
 }
 
 // Validate checks if a credit card number is valid
@@ -48,21 +65,10 @@ func (c *cardValidator) sanitize(cardNumber string) string {
 	return re.ReplaceAllString(cardNumber, "")
 }
 
-var brandPrefixes = map[string]string{
-	"4":    "visa",
-	"5":    "master",
-	"34":   "amex",
-	"37":   "amex",
-	"6011": "discover",
-	"380":  "diners",
-	"386":  "diners",
-	"388":  "diners",
-}
-
 // getBrand returns the brand of a credit card number
 // based on the first digits of the card number
 func (c *cardValidator) getBrand(cardNumber string) string {
-	for prefix, brand := range brandPrefixes {
+	for prefix, brand := range c.brandPrefixes {
 		if len(cardNumber) >= len(prefix) && cardNumber[:len(prefix)] == prefix {
 			return brand
 		}

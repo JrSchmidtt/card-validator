@@ -60,6 +60,10 @@ func TestCardValidator(t *testing.T) {
 			scenario: "Card number is too long",
 			function: testLongCardNumber,
 		},
+		{
+			scenario: "Injecting custom brand prefixes on constructor",
+			function: testCustomBrandPrefixes,
+		},
 	}
 
 	for _, tc := range testcases {
@@ -103,4 +107,13 @@ func testInvalidCardNumber(t *testing.T) {
 	isValid, brandName := validator.Validate(creditCardNumbers["master"]["invalid"])
 	assert.False(t, isValid, errExpectedCardNumberToBeInvalid)
 	assert.True(t, brandName == "", errExpectedBrandNameToBeEmpty)
+}
+
+func testCustomBrandPrefixes(t *testing.T) {
+	validator = card_validator.NewCardValidator(map[string]string{
+		"6062": "hipercard",
+	})
+	isValid, brandName := validator.Validate("6062 8256 3368 6177")
+	assert.True(t, isValid, errExpectedCardNumberToBeValid)
+	assert.True(t, brandName == "hipercard", "Expected brand name to be hipercard")
 }
