@@ -1,7 +1,6 @@
 package card_validator_test
 
 import (
-	"fmt"
 	"testing"
 
 	card_validator "github.com/JrSchmidtt/card-validator"
@@ -71,26 +70,29 @@ func TestCardValidator(t *testing.T) {
 const (
 	errExpectedCardNumberToBeValid   = "Expected card number to be valid"
 	errExpectedCardNumberToBeInvalid = "Expected card number to be invalid"
+	errExpectedBrandNameToBeEmpty    = "Expected brand name to be empty"
 )
 
 func testSuccess(t *testing.T) {
-	isValid := validator.Validate(creditCardNumbers["master"]["valid"])
+	isValid, brandName := validator.Validate(creditCardNumbers["master"]["valid"])
+	assert.True(t, brandName == "master", "Expected brand name to be master")
 	assert.True(t, isValid, errExpectedCardNumberToBeValid)
 }
 
 func testShortCardNumber(t *testing.T) {
-	isValid := validator.Validate("1234")
+	isValid, brandName := validator.Validate("1234")
 	assert.False(t, isValid, errExpectedCardNumberToBeInvalid)
+	assert.True(t, brandName == "", errExpectedBrandNameToBeEmpty)
 }
 
 func testLongCardNumber(t *testing.T) {
-	isValid := validator.Validate("12345678901234567890")
+	isValid, brandName := validator.Validate("12345678901234567890")
 	assert.False(t, isValid, errExpectedCardNumberToBeInvalid)
+	assert.True(t, brandName == "", errExpectedBrandNameToBeEmpty)
 }
 
 func testInvalidCardNumber(t *testing.T) {
-	isValid := validator.Validate(creditCardNumbers["master"]["invalid"])
-	fmt.Println("Card number: ", creditCardNumbers["master"]["invalid"])
-	fmt.Println("isValid: ", isValid)
+	isValid, brandName := validator.Validate(creditCardNumbers["master"]["invalid"])
 	assert.False(t, isValid, errExpectedCardNumberToBeInvalid)
+	assert.True(t, brandName == "", errExpectedBrandNameToBeEmpty)
 }

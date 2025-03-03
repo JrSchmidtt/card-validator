@@ -5,7 +5,7 @@ import (
 )
 
 type CardValidator interface {
-	Validate(cardNumber string) bool
+	Validate(cardNumber string) (isValid bool, brandName string)
 }
 
 type cardValidator struct{}
@@ -16,13 +16,11 @@ func NewCardValidator() CardValidator {
 
 // Validate checks if a credit card number is valid
 // A credit card number is valid if it passes the Luhn algorithm
-func (c *cardValidator) Validate(rawNumber string) bool {
+func (c *cardValidator) Validate(rawNumber string) (isValid bool, brandName string) {
 	sanitized := c.sanitize(rawNumber)
-
 	if len(sanitized) < 13 || len(sanitized) > 19 {
-		return false
+		return false, ""
 	}
-
 	// Luhn algorithm
 	var sum int
 	isSecond := false
@@ -37,10 +35,31 @@ func (c *cardValidator) Validate(rawNumber string) bool {
 		sum += digit
 		isSecond = !isSecond
 	}
-	return sum%10 == 0
+	isValid = sum%10 == 0
+	if !isValid {
+		return false, ""
+	}
+	cardBrand := c.getBrand(sanitized)
+	return true, cardBrand
 }
 
 func (c *cardValidator) sanitize(cardNumber string) string {
 	re := regexp.MustCompile(`\D`)
 	return re.ReplaceAllString(cardNumber, "")
+}
+
+func (c *cardValidator) getBrand(cardNumber string) string {
+	if cardNumber[0] == '4' {
+		return "visa"
+	}
+
+	if cardNumber[0] == '5' {
+		return "master"
+	}
+
+	if cardNumber[0] == '3' && (cardNumber[1] == '4' || cardNumber[1] == '7') {
+		return "amex"
+	}
+
+	return ""
 }
